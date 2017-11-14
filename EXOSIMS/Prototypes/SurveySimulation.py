@@ -5,6 +5,7 @@ import sys, logging
 import numpy as np
 import astropy.units as u
 import astropy.constants as const
+from astropy.coordinates import SkyCoord
 import random as py_random
 import time
 import json, os.path, copy, re, inspect, subprocess
@@ -1210,6 +1211,10 @@ def array_encoder(obj):
         # note: it is possible to have a numpy ndarray wrapped in a Quantity.
         # NB: alternatively, can return (obj.value, obj.unit.name)
         return obj.value
+    if isinstance(obj, SkyCoord):
+        return dict(lon=obj.heliocentrictrueecliptic.lon.value,
+                    lat=obj.heliocentrictrueecliptic.lat.value,
+                    distance=obj.heliocentrictrueecliptic.distance.value)
     if isinstance(obj, (np.ndarray, np.number)):
         # ndarray -> list of numbers
         return obj.tolist()
@@ -1230,7 +1235,9 @@ def array_encoder(obj):
         return list(obj)
     if isinstance(obj, bytes):
         return obj.decode()
-    # nothing worked, bail out
-    
+    # an EXOSIMS object
+    if hasattr(obj, '_modtype'):
+        return obj.__dict__
+    # nothing worked, bail out (FIXME)
     return json.JSONEncoder.default(obj)
 
