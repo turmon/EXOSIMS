@@ -1238,6 +1238,6 @@ def array_encoder(obj):
     # an EXOSIMS object
     if hasattr(obj, '_modtype'):
         return obj.__dict__
-    # nothing worked, bail out (FIXME)
-    return json.JSONEncoder.default(obj)
+    # nothing worked, bail out
+    raise ValueError('Could not JSON-encode an object of type %s' % type(obj))
 
